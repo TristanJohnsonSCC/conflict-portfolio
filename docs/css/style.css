@@ -1,0 +1,183 @@
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --text: #1f2933;
+  --muted: #52606d;
+  --accent: #2f5d50;
+  --accent-light: #e8f2ee;
+  --border: #d9e2ec;
+  --shadow: 0 1px 3px rgba(31, 41, 51, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Calibri, "Segoe UI", Tahoma, sans-serif;
+  font-size: 12pt;
+  line-height: 1.7;
+  color: var(--text);
+  background: var(--bg);
+}
+
+a {
+  color: var(--accent);
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.site-header-inner,
+.page-wrap,
+.footer-inner {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+}
+
+.site-header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.site-header p {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.top-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.top-nav a {
+  text-decoration: none;
+}
+
+.top-nav a.active {
+  font-weight: 700;
+}
+
+.page-wrap {
+  padding-top: 1.5rem;
+  padding-bottom: 3rem;
+}
+
+.hero,
+.chapter-card,
+.chapter-content,
+.appendix-note {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+
+.hero,
+.chapter-card,
+.appendix-note {
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.hero h2,
+.chapter-content h2:first-child {
+  margin-top: 0;
+}
+
+.toc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.9rem;
+}
+
+.chapter-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.chapter-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.chapter-content {
+  padding: 1.5rem 1.75rem;
+}
+
+.chapter-content h2 {
+  margin: 2rem 0 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 1.2rem;
+}
+
+.chapter-content h2:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.chapter-content h3 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+.chapter-content p {
+  margin: 0 0 0.9rem;
+}
+
+.chapter-content .references {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.chapter-content .references h2 {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.chapter-content ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.chapter-content li {
+  margin-bottom: 0.6rem;
+}
+
+.appendix-note {
+  background: var(--accent-light);
+}
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .chapter-content {
+    padding: 1.1rem 1rem;
+  }
+}
