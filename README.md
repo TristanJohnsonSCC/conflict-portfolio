@@ -31,7 +31,3 @@ Chapter content lives in the parent `Communication` folder. After editing a draf
 ```bash
 python build_portfolio.py
 ```
-
-## Notes
-
-The weekly chapter writing is my own work. I used some AI assistance while putting together the site layout and styling.
