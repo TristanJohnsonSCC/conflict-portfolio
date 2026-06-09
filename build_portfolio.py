@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 COMM = ROOT.parent
 OUT = ROOT / "docs"
+STUDENT_NAME = "Tristan Johnson"
 
 CHAPTERS = [
     {
@@ -193,13 +194,80 @@ def convert_text_to_html(text: str) -> str:
     return "\n".join(parts)
 
 
-def nav_html(active: str | None = None) -> str:
-    links = ['<a href="index.html">Home</a>']
-    for chapter in CHAPTERS:
-        slug = chapter["slug"]
-        cls = ' class="active"' if active == slug else ""
-        links.append(f'<a href="{slug}.html"{cls}>{escape(chapter["title"])}</a>')
-    return "\n".join(links)
+def primary_action(active: str | None = None) -> tuple[str, str]:
+    if active is None:
+        return f"{CHAPTERS[0]['slug']}.html", "Start Reading"
+    for index, chapter in enumerate(CHAPTERS):
+        if chapter["slug"] == active:
+            if index + 1 < len(CHAPTERS):
+                next_chapter = CHAPTERS[index + 1]
+                return f"{next_chapter['slug']}.html", "Next Chapter"
+            return "index.html", "Back to Home"
+    return f"{CHAPTERS[0]['slug']}.html", "Start Reading"
+
+
+def toc_menu_html(active: str | None = None) -> str:
+    home_cls = "toc-item is-current" if active is None else "toc-item"
+    items = [f'<a href="index.html" class="{home_cls}" role="menuitem">Home</a>']
+    for index, chapter in enumerate(CHAPTERS, start=1):
+        cls = "toc-item is-current" if active == chapter["slug"] else "toc-item"
+        label = f"Chapter {index}: {chapter['title']}"
+        items.append(
+            f'<a href="{chapter["slug"]}.html" class="{cls}" role="menuitem">{escape(label)}</a>'
+        )
+    return "\n            ".join(items)
+
+
+def bottom_nav_html(active: str | None = None) -> str:
+    href, label = primary_action(active)
+    return (
+        f'<nav class="chapter-bottom-nav" aria-label="Continue reading">'
+        f'<a href="{href}" class="btn btn-primary">{escape(label)}</a>'
+        f"</nav>"
+    )
+
+
+def header_actions_html(active: str | None = None, suffix: str = "main") -> str:
+    menu_id = f"toc-menu-{suffix}"
+    toggle_id = f"toc-toggle-{suffix}"
+    href, label = primary_action(active)
+    return f"""<div class="header-actions">
+          <div class="toc-dropdown">
+            <button type="button" class="btn btn-ghost" id="{toggle_id}" aria-expanded="false" aria-controls="{menu_id}" aria-haspopup="true">
+              Table of Contents
+            </button>
+            <div class="toc-menu" id="{menu_id}" role="menu" hidden>
+              {toc_menu_html(active)}
+            </div>
+          </div>
+          <a href="{href}" class="btn btn-primary">{escape(label)}</a>
+        </div>"""
+
+
+def header_html(active: str | None = None, variant: str = "main") -> str:
+    suffix = "dock" if variant == "dock" else "main"
+    if variant == "dock":
+        header_class = "site-header site-header--dock"
+        header_id = ' id="header-dock"'
+        subtitle = ""
+        title_markup = '<p class="dock-title"><a href="index.html">Conflict Portfolio</a></p>'
+    else:
+        header_class = "site-header site-header--main"
+        header_id = ""
+        subtitle = "<p>Communication Course Portfolio</p>"
+        title_markup = "<h1><a href=\"index.html\">Conflict Portfolio</a></h1>"
+
+    return f"""<header class="{header_class}"{header_id} aria-hidden="{"true" if variant == "dock" else "false"}">
+    <div class="site-header-inner">
+      <div class="header-row">
+        <div class="header-brand">
+          {title_markup}
+          {subtitle}
+        </div>
+        {header_actions_html(active, suffix)}
+      </div>
+    </div>
+  </header>"""
 
 
 def page_shell(title: str, body: str, active: str | None = None) -> str:
@@ -212,23 +280,135 @@ def page_shell(title: str, body: str, active: str | None = None) -> str:
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="site-header-inner">
-      <h1><a href="index.html">Conflict Portfolio</a></h1>
-      <p>Communication Course Portfolio</p>
-      <nav class="top-nav" aria-label="Portfolio chapters">
-        {nav_html(active)}
-      </nav>
-    </div>
-  </header>
+  {header_html(active, "main")}
+  {header_html(active, "dock")}
   <main class="page-wrap">
     {body}
+    {bottom_nav_html(active)}
   </main>
   <footer class="site-footer">
     <div class="footer-inner">
-      <p>Conflict Portfolio &middot; Spring 2026</p>
+      <p>{escape(STUDENT_NAME)} &middot; Conflict Portfolio &middot; Spring 2026</p>
     </div>
   </footer>
+  <button type="button" class="back-to-top" id="back-to-top" aria-label="Return to top">
+    <span aria-hidden="true">&uarr;</span>
+  </button>
+  <script>
+  (function () {{
+    var mainHeader = document.querySelector(".site-header--main");
+    var dock = document.getElementById("header-dock");
+    var backToTop = document.getElementById("back-to-top");
+    var lastY = window.scrollY || 0;
+    var dockOpen = false;
+    var suppressDockUntilTop = false;
+    var atTopThreshold = 16;
+    var atBottomThreshold = 32;
+    var scrollDelta = 4;
+    var backToTopThreshold = 400;
+
+    function atPageBottom() {{
+      var y = window.scrollY || 0;
+      var maxScroll = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight
+      );
+      return maxScroll - y <= atBottomThreshold;
+    }}
+
+    function wireToc(headerRoot) {{
+      if (!headerRoot) return;
+      var toggle = headerRoot.querySelector(".toc-dropdown button");
+      var menu = headerRoot.querySelector(".toc-menu");
+      if (!toggle || !menu) return;
+
+      function closeMenu() {{
+        menu.hidden = true;
+        toggle.setAttribute("aria-expanded", "false");
+      }}
+
+      headerRoot.querySelector(".toc-dropdown").addEventListener("click", function (event) {{
+        event.stopPropagation();
+      }});
+
+      toggle.addEventListener("click", function () {{
+        var open = menu.hidden;
+        document.querySelectorAll(".toc-menu").forEach(function (other) {{
+          if (other !== menu) {{
+            other.hidden = true;
+            var otherToggle = other.parentElement.querySelector("button");
+            if (otherToggle) otherToggle.setAttribute("aria-expanded", "false");
+          }}
+        }});
+        menu.hidden = !open;
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      }});
+
+      menu.querySelectorAll(".toc-item").forEach(function (link) {{
+        link.addEventListener("click", closeMenu);
+      }});
+
+      return closeMenu;
+    }}
+
+    var closeDockToc = wireToc(dock);
+    wireToc(mainHeader);
+
+    document.addEventListener("click", function () {{
+      document.querySelectorAll(".toc-menu").forEach(function (menu) {{
+        menu.hidden = true;
+      }});
+      document.querySelectorAll(".toc-dropdown button").forEach(function (btn) {{
+        btn.setAttribute("aria-expanded", "false");
+      }});
+    }});
+
+    function setDockOpen(open) {{
+      if (!dock || dockOpen === open) return;
+      dockOpen = open;
+      dock.classList.toggle("is-revealed", open);
+      dock.setAttribute("aria-hidden", open ? "false" : "true");
+      if (!open && closeDockToc) closeDockToc();
+    }}
+
+    function onScroll() {{
+      var y = window.scrollY || 0;
+      var delta = y - lastY;
+
+      if (y <= atTopThreshold || atPageBottom()) {{
+        setDockOpen(false);
+        if (y <= atTopThreshold) suppressDockUntilTop = false;
+      }} else if (suppressDockUntilTop) {{
+        setDockOpen(false);
+        if (delta > scrollDelta) {{
+          suppressDockUntilTop = false;
+        }}
+      }} else if (delta < -scrollDelta) {{
+        setDockOpen(true);
+      }} else if (delta > scrollDelta) {{
+        setDockOpen(false);
+      }}
+
+      if (backToTop) {{
+        backToTop.classList.toggle("is-visible", y > backToTopThreshold);
+      }}
+
+      lastY = y;
+    }}
+
+    if (backToTop) {{
+      backToTop.addEventListener("click", function () {{
+        suppressDockUntilTop = true;
+        setDockOpen(false);
+        window.scrollTo({{ top: 0, behavior: "smooth" }});
+      }});
+    }}
+
+    window.addEventListener("scroll", onScroll, {{ passive: true }});
+    setDockOpen(false);
+    onScroll();
+  }})();
+  </script>
 </body>
 </html>
 """

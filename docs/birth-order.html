@@ -7,21 +7,62 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="site-header">
+  <header class="site-header site-header--main" aria-hidden="false">
     <div class="site-header-inner">
-      <h1><a href="index.html">Conflict Portfolio</a></h1>
-      <p>Communication Course Portfolio</p>
-      <nav class="top-nav" aria-label="Portfolio chapters">
-        <a href="index.html">Home</a>
-<a href="birth-order.html" class="active">Birth Order</a>
-<a href="attachment-style.html">Attachment Style</a>
-<a href="personality-type.html">Personality Type</a>
-<a href="family-culture.html">Family &amp; Culture</a>
-<a href="communication-style.html">Communication Style</a>
-<a href="conflict-style.html">Conflict Style</a>
-<a href="coping-skills.html">Coping Skills</a>
-<a href="resolving-conflicts.html">Resolving Conflicts</a>
-      </nav>
+      <div class="header-row">
+        <div class="header-brand">
+          <h1><a href="index.html">Conflict Portfolio</a></h1>
+          <p>Communication Course Portfolio</p>
+        </div>
+        <div class="header-actions">
+          <div class="toc-dropdown">
+            <button type="button" class="btn btn-ghost" id="toc-toggle-main" aria-expanded="false" aria-controls="toc-menu-main" aria-haspopup="true">
+              Table of Contents
+            </button>
+            <div class="toc-menu" id="toc-menu-main" role="menu" hidden>
+              <a href="index.html" class="toc-item" role="menuitem">Home</a>
+            <a href="birth-order.html" class="toc-item is-current" role="menuitem">Chapter 1: Birth Order</a>
+            <a href="attachment-style.html" class="toc-item" role="menuitem">Chapter 2: Attachment Style</a>
+            <a href="personality-type.html" class="toc-item" role="menuitem">Chapter 3: Personality Type</a>
+            <a href="family-culture.html" class="toc-item" role="menuitem">Chapter 4: Family &amp; Culture</a>
+            <a href="communication-style.html" class="toc-item" role="menuitem">Chapter 5: Communication Style</a>
+            <a href="conflict-style.html" class="toc-item" role="menuitem">Chapter 6: Conflict Style</a>
+            <a href="coping-skills.html" class="toc-item" role="menuitem">Chapter 7: Coping Skills</a>
+            <a href="resolving-conflicts.html" class="toc-item" role="menuitem">Chapter 8: Resolving Conflicts</a>
+            </div>
+          </div>
+          <a href="attachment-style.html" class="btn btn-primary">Next Chapter</a>
+        </div>
+      </div>
+    </div>
+  </header>
+  <header class="site-header site-header--dock" id="header-dock" aria-hidden="true">
+    <div class="site-header-inner">
+      <div class="header-row">
+        <div class="header-brand">
+          <p class="dock-title"><a href="index.html">Conflict Portfolio</a></p>
+          
+        </div>
+        <div class="header-actions">
+          <div class="toc-dropdown">
+            <button type="button" class="btn btn-ghost" id="toc-toggle-dock" aria-expanded="false" aria-controls="toc-menu-dock" aria-haspopup="true">
+              Table of Contents
+            </button>
+            <div class="toc-menu" id="toc-menu-dock" role="menu" hidden>
+              <a href="index.html" class="toc-item" role="menuitem">Home</a>
+            <a href="birth-order.html" class="toc-item is-current" role="menuitem">Chapter 1: Birth Order</a>
+            <a href="attachment-style.html" class="toc-item" role="menuitem">Chapter 2: Attachment Style</a>
+            <a href="personality-type.html" class="toc-item" role="menuitem">Chapter 3: Personality Type</a>
+            <a href="family-culture.html" class="toc-item" role="menuitem">Chapter 4: Family &amp; Culture</a>
+            <a href="communication-style.html" class="toc-item" role="menuitem">Chapter 5: Communication Style</a>
+            <a href="conflict-style.html" class="toc-item" role="menuitem">Chapter 6: Conflict Style</a>
+            <a href="coping-skills.html" class="toc-item" role="menuitem">Chapter 7: Coping Skills</a>
+            <a href="resolving-conflicts.html" class="toc-item" role="menuitem">Chapter 8: Resolving Conflicts</a>
+            </div>
+          </div>
+          <a href="attachment-style.html" class="btn btn-primary">Next Chapter</a>
+        </div>
+      </div>
     </div>
   </header>
   <main class="page-wrap">
@@ -60,11 +101,130 @@
 </ul></div>
 </article>
 
+    <nav class="chapter-bottom-nav" aria-label="Continue reading"><a href="attachment-style.html" class="btn btn-primary">Next Chapter</a></nav>
   </main>
   <footer class="site-footer">
     <div class="footer-inner">
-      <p>Conflict Portfolio &middot; Spring 2026</p>
+      <p>Tristan Johnson &middot; Conflict Portfolio &middot; Spring 2026</p>
     </div>
   </footer>
+  <button type="button" class="back-to-top" id="back-to-top" aria-label="Return to top">
+    <span aria-hidden="true">&uarr;</span>
+  </button>
+  <script>
+  (function () {
+    var mainHeader = document.querySelector(".site-header--main");
+    var dock = document.getElementById("header-dock");
+    var backToTop = document.getElementById("back-to-top");
+    var lastY = window.scrollY || 0;
+    var dockOpen = false;
+    var suppressDockUntilTop = false;
+    var atTopThreshold = 16;
+    var atBottomThreshold = 32;
+    var scrollDelta = 4;
+    var backToTopThreshold = 400;
+
+    function atPageBottom() {
+      var y = window.scrollY || 0;
+      var maxScroll = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight
+      );
+      return maxScroll - y <= atBottomThreshold;
+    }
+
+    function wireToc(headerRoot) {
+      if (!headerRoot) return;
+      var toggle = headerRoot.querySelector(".toc-dropdown button");
+      var menu = headerRoot.querySelector(".toc-menu");
+      if (!toggle || !menu) return;
+
+      function closeMenu() {
+        menu.hidden = true;
+        toggle.setAttribute("aria-expanded", "false");
+      }
+
+      headerRoot.querySelector(".toc-dropdown").addEventListener("click", function (event) {
+        event.stopPropagation();
+      });
+
+      toggle.addEventListener("click", function () {
+        var open = menu.hidden;
+        document.querySelectorAll(".toc-menu").forEach(function (other) {
+          if (other !== menu) {
+            other.hidden = true;
+            var otherToggle = other.parentElement.querySelector("button");
+            if (otherToggle) otherToggle.setAttribute("aria-expanded", "false");
+          }
+        });
+        menu.hidden = !open;
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+
+      menu.querySelectorAll(".toc-item").forEach(function (link) {
+        link.addEventListener("click", closeMenu);
+      });
+
+      return closeMenu;
+    }
+
+    var closeDockToc = wireToc(dock);
+    wireToc(mainHeader);
+
+    document.addEventListener("click", function () {
+      document.querySelectorAll(".toc-menu").forEach(function (menu) {
+        menu.hidden = true;
+      });
+      document.querySelectorAll(".toc-dropdown button").forEach(function (btn) {
+        btn.setAttribute("aria-expanded", "false");
+      });
+    });
+
+    function setDockOpen(open) {
+      if (!dock || dockOpen === open) return;
+      dockOpen = open;
+      dock.classList.toggle("is-revealed", open);
+      dock.setAttribute("aria-hidden", open ? "false" : "true");
+      if (!open && closeDockToc) closeDockToc();
+    }
+
+    function onScroll() {
+      var y = window.scrollY || 0;
+      var delta = y - lastY;
+
+      if (y <= atTopThreshold || atPageBottom()) {
+        setDockOpen(false);
+        if (y <= atTopThreshold) suppressDockUntilTop = false;
+      } else if (suppressDockUntilTop) {
+        setDockOpen(false);
+        if (delta > scrollDelta) {
+          suppressDockUntilTop = false;
+        }
+      } else if (delta < -scrollDelta) {
+        setDockOpen(true);
+      } else if (delta > scrollDelta) {
+        setDockOpen(false);
+      }
+
+      if (backToTop) {
+        backToTop.classList.toggle("is-visible", y > backToTopThreshold);
+      }
+
+      lastY = y;
+    }
+
+    if (backToTop) {
+      backToTop.addEventListener("click", function () {
+        suppressDockUntilTop = true;
+        setDockOpen(false);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    setDockOpen(false);
+    onScroll();
+  })();
+  </script>
 </body>
 </html>
